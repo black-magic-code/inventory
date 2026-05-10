@@ -19,6 +19,18 @@
   }
 }
 
+.text {
+  color: var(--foreground);
+}
+
+.clip-text {
+  background-clip: text;
+}
+
+.background {
+  background: var(--background);
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
