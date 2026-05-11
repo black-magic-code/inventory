@@ -60,61 +60,13 @@ export default function ProductForm() {
 
   useEffect(() => {
 
-    let permissionStatus = null
+  return () => {
 
-    const checkCameraPermission =
-      async () => {
+    stopCamera()
 
-        try {
+  }
 
-          if (
-            !navigator.permissions
-          ) {
-            return
-          }
-
-          permissionStatus =
-            await navigator.permissions.query({
-              name: "camera"
-            })
-
-          setCameraPermission(
-            permissionStatus.state
-          )
-
-          permissionStatus.onchange =
-            () => {
-
-              setCameraPermission(
-                permissionStatus.state
-              )
-
-            }
-
-        } catch (error) {
-
-          console.log(error)
-
-        }
-
-      }
-
-    checkCameraPermission()
-
-    return () => {
-
-      stopCamera()
-
-      if (permissionStatus) {
-
-        permissionStatus.onchange =
-          null
-
-      }
-
-    }
-
-  }, [])
+}, [])
 
   const handleChange = (e) => {
 
@@ -234,70 +186,67 @@ export default function ProductForm() {
   }
 
   const startCamera =
-    async () => {
+  async () => {
+
+    try {
 
       if (
-        cameraPermission ===
-        "denied"
+        typeof window === "undefined"
+      ) {
+        return
+      }
+
+      if (
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia
       ) {
 
         alert(
-          "Camera permission denied. Enable it from browser settings."
+          "Camera not supported on this device"
         )
 
         return
-
       }
 
-      try {
+      const stream =
+        await navigator
+          .mediaDevices
+          .getUserMedia({
 
-        const stream =
-          await navigator
-            .mediaDevices
-            .getUserMedia({
+            video: {
+              facingMode:
+                "environment"
+            },
 
-              video: {
-                facingMode:
-                  "environment"
-              },
+            audio: false
+          })
 
-              audio: false
+      streamRef.current =
+        stream
 
-            })
+      setShowCamera(true)
 
-        streamRef.current =
-          stream
+      setTimeout(() => {
 
-        setShowCamera(true)
+        if (
+          videoRef.current
+        ) {
 
-        setCameraPermission(
-          "granted"
-        )
+          videoRef.current.srcObject =
+            stream
+        }
 
-        setTimeout(() => {
+      }, 100)
 
-          if (
-            videoRef.current
-          ) {
+    } catch (error) {
 
-            videoRef.current.srcObject =
-              stream
+      console.log(error)
 
-          }
-
-        }, 100)
-
-      } catch (error) {
-
-        console.log(error)
-
-        setCameraPermission(
-          "denied"
-        )
-
-      }
-
+      alert(
+        "Unable to access camera"
+      )
     }
+  }
 
   const stopCamera = () => {
 
@@ -529,10 +478,6 @@ export default function ProductForm() {
 
             <button
               type="button"
-              disabled={
-                cameraPermission ===
-                "denied"
-              }
               onClick={
                 startCamera
               }
@@ -544,20 +489,6 @@ export default function ProductForm() {
               flex
               items-center
               gap-2
-
-              ${
-                cameraPermission ===
-                "denied"
-
-                  ? `
-                    opacity-50
-                    cursor-not-allowed
-                    border-red-500
-                    text-red-500
-                  `
-
-                  : ""
-              }
             `}
             >
 
