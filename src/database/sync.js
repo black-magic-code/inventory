@@ -31,17 +31,19 @@ export async function startSync() {
       }
     )
 
-    syncHandler = localDB.sync(remoteDB, {
+    syncHandler = localDB.sync(
+      remoteDB,
+      {
 
-      live: true,
+        live: true,
 
-      retry: true,
+        retry: true,
 
-      heartbeat: 10000,
+        heartbeat: 10000,
 
-      timeout: 30000
-
-    })
+        timeout: 30000
+      }
+    )
 
       .on("change", (info) => {
 
@@ -109,32 +111,5 @@ export async function startSync() {
     )
 
     return null
-  }
-}          username: "admin",
-          password: "password"
-        }
-      }
-      )
-
-    const online =
-      navigator.onLine
-
-    // FIRST TIME ONLINE SYNC
-
-    if (online) {
-      await db.replicate.from(
-        remoteDB
-      )
-    }
-
-    db.sync(remoteDB, {
-
-      live: true,
-
-      retry: true
-
-    })
-
-  } catch (error) {
   }
 }
