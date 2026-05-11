@@ -1,9 +1,5 @@
 "use client"
 
-import PouchDB from "pouchdb-browser"
-
-import { getDB } from "./pouchdb"
-
 let syncHandler = null
 
 export async function startSync() {
@@ -18,88 +14,103 @@ export async function startSync() {
       return syncHandler
     }
 
-    const localDB = getDB()
+    const PouchDB =
+      (await import("pouchdb-browser"))
+        .default
+
+    const { getDB } =
+      await import("./pouchdb")
+
+    const localDB =
+      await getDB()
 
     if (!localDB) {
       return null
     }
 
-    const remoteDB = new PouchDB(
-      process.env.NEXT_PUBLIC_SYNC_URL,
-      {
-        skip_setup: true
-      }
-    )
+    const remoteDB =
+      new PouchDB(
 
-    syncHandler = localDB.sync(
-      remoteDB,
-      {
+        process.env
+          .NEXT_PUBLIC_SYNC_URL,
 
-        live: true,
+        {
+          skip_setup: true
+        }
+      )
 
-        retry: true,
+    syncHandler =
+      localDB.sync(
 
-        heartbeat: 10000,
+        remoteDB,
 
-        timeout: 30000
-      }
-    )
+        {
 
-      .on("change", (info) => {
+          live: true,
 
-        console.log(
-          "SYNC CHANGE",
-          info
-        )
-      })
+          retry: true,
 
-      .on("paused", (error) => {
+          heartbeat: 10000,
 
-        if (error) {
+          timeout: 30000
+        }
+      )
+
+        .on("change", (info) => {
 
           console.log(
-            "SYNC PAUSED ERROR",
+            "SYNC CHANGE",
+            info
+          )
+        })
+
+        .on("paused", (error) => {
+
+          if (error) {
+
+            console.log(
+              "SYNC PAUSED ERROR",
+              error
+            )
+
+          } else {
+
+            console.log(
+              "SYNC PAUSED"
+            )
+          }
+        })
+
+        .on("active", () => {
+
+          console.log(
+            "SYNC ACTIVE"
+          )
+        })
+
+        .on("denied", (error) => {
+
+          console.log(
+            "SYNC DENIED",
             error
           )
+        })
 
-        } else {
+        .on("complete", (info) => {
 
           console.log(
-            "SYNC PAUSED"
+            "SYNC COMPLETE",
+            info
           )
-        }
-      })
+        })
 
-      .on("active", () => {
+        .on("error", (error) => {
 
-        console.log(
-          "SYNC ACTIVE"
-        )
-      })
-
-      .on("denied", (error) => {
-
-        console.log(
-          "SYNC DENIED",
-          error
-        )
-      })
-
-      .on("complete", (info) => {
-
-        console.log(
-          "SYNC COMPLETE",
-          info
-        )
-      })
-
-      .on("error", (error) => {
-
-        console.log(
-          "SYNC ERROR",
-          error
-        )
-      })
+          console.log(
+            "SYNC ERROR",
+            error
+          )
+        })
 
     return syncHandler
 
