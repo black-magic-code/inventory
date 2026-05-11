@@ -1,27 +1,38 @@
-import nextPWA from 'next-pwa'
+import nextPWA from "next-pwa"
 
 const withPWA = nextPWA({
-  dest: 'public',
+
+  dest: "public",
 
   register: true,
+
   skipWaiting: true,
 
-  disable: process.env.NODE_ENV === 'development'
+  clientsClaim: true,
+
+  disable:
+    process.env.NODE_ENV === "development",
+
+  fallbacks: {
+
+    document: "/offline"
+  }
 })
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
 
   reactStrictMode: true,
 
+  images: {
+
+    unoptimized: true
+  },
+
   experimental: {
+
     optimizePackageImports: [
       "react-icons"
     ]
-  },
-
-  images: {
-    unoptimized: true
   }
 }
 
