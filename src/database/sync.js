@@ -1,40 +1,116 @@
 "use client"
 
-import { getDB }
-  from "./pouchdb"
+import PouchDB from "pouchdb-browser"
 
-let started = false
+import { getDB } from "./pouchDB"
 
-const syncUrl = process.env.NEXT_PUBLIC_SYNC_URL
+let syncHandler = null
 
-export const startSync = async () => {
+export async function startSync() {
 
   try {
 
-    if (started) return
-    if (!syncUrl) {
-      console.error('Invalid Sync!')
-      return
+    if (typeof window === "undefined") {
+      return null
     }
-    started = true
 
-    const db =
-      await getDB()
+    if (syncHandler) {
+      return syncHandler
+    }
 
-    if (!db) return
+    const localDB = getDB()
 
-    const PouchDBModule =
-      await import(
-        "pouchdb-browser"
-      )
+    if (!localDB) {
+      return null
+    }
 
-    const PouchDB =
-      PouchDBModule.default
+    const remoteDB = new PouchDB(
+      process.env.NEXT_PUBLIC_SYNC_URL,
+      {
+        skip_setup: true
+      }
+    )
 
-    const remoteDB =
-      new PouchDB(syncUrl, {
-        auth: {
-          username: "admin",
+    syncHandler = localDB.sync(remoteDB, {
+
+      live: true,
+
+      retry: true,
+
+      heartbeat: 10000,
+
+      timeout: 30000
+
+    })
+
+      .on("change", (info) => {
+
+        console.log(
+          "SYNC CHANGE",
+          info
+        )
+      })
+
+      .on("paused", (error) => {
+
+        if (error) {
+
+          console.log(
+            "SYNC PAUSED ERROR",
+            error
+          )
+
+        } else {
+
+          console.log(
+            "SYNC PAUSED"
+          )
+        }
+      })
+
+      .on("active", () => {
+
+        console.log(
+          "SYNC ACTIVE"
+        )
+      })
+
+      .on("denied", (error) => {
+
+        console.log(
+          "SYNC DENIED",
+          error
+        )
+      })
+
+      .on("complete", (info) => {
+
+        console.log(
+          "SYNC COMPLETE",
+          info
+        )
+      })
+
+      .on("error", (error) => {
+
+        console.log(
+          "SYNC ERROR",
+          error
+        )
+      })
+
+    return syncHandler
+
+  } catch (error) {
+
+    console.log(
+      "START SYNC ERROR",
+      error
+    )
+
+    return null
+  }
+}          username: "admin",
           password: "password"
         }
       }
