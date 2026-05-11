@@ -143,13 +143,21 @@ export default function useVoiceSearch(
 
       if (recognitionRef.current) {
 
-        recognitionRef.current.onend = null
+  recognitionRef.current.onresult =
+    null
 
-        recognitionRef.current.stop()
+  recognitionRef.current.onerror =
+    null
 
-        recognitionRef.current.abort()
+  recognitionRef.current.onend =
+    null
 
-        recognitionRef.current = null
+  recognitionRef.current.stop()
+
+  recognitionRef.current.abort()
+
+  recognitionRef.current =
+    null
       }
 
       if (audioStreamRef.current) {
