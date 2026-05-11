@@ -1,29 +1,31 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import "./globals.css"
 
 export const metadata = {
-  title: "Birma Directory",
-  description: "Quick View Directory",
-};
 
-export default function RootLayout({ children }) {
+  title: "Birmadir",
+
+  description:
+    "Offline First Inventory Application",
+
+  manifest: "/manifest.json",
+
+  themeColor: "#ededed"
+}
+
+export default function RootLayout({
+  children
+}) {
+
   return (
+
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+
+      <body>
+
         {children}
+
       </body>
+
     </html>
-  );
+  )
 }
