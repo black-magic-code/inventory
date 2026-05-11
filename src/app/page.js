@@ -50,56 +50,6 @@ import {
 
 export default function HomePage() {
 
-  useEffect(() => {
-
-    let permissionStatus = null
-
-    const checkPermission = async () => {
-
-      try {
-
-        if (
-          !navigator.permissions
-        ) {
-          return
-        }
-
-        permissionStatus =
-          await navigator.permissions.query({
-            name: "microphone"
-          })
-
-        setMicPermission(
-          permissionStatus.state
-        )
-
-        permissionStatus.onchange = () => {
-
-          setMicPermission(
-            permissionStatus.state
-          )
-
-        }
-
-      } catch (error) {
-      }
-
-    }
-
-    checkPermission()
-
-    return () => {
-
-      if (permissionStatus) {
-
-        permissionStatus.onchange = null
-
-      }
-
-    }
-
-  }, [])
-
   const [products, setProducts] =
     useState([])
 
