@@ -1,32 +1,25 @@
 "use client"
+
+import PouchDB from "pouchdb-browser"
+
 let db = null
-const dbName = process.env.NEXT_PUBLIC_DB_NAME
-export const getDB = async () => {
+
+export function getDB() {
 
   if (typeof window === "undefined") {
     return null
   }
 
-  if (db) {
-    return db
+  if (!db) {
+
+    db = new PouchDB(
+      process.env.NEXT_PUBLIC_DB_NAME || "inventory",
+      {
+        auto_compaction: true,
+        revs_limit: 20
+      }
+    )
   }
-
-  const PouchDBModule = await import("pouchdb-browser")
-
-  const PouchdbFindModule = await import("pouchdb-find")
-
-  const HttpAdapterModule = await import("pouchdb-adapter-http")
-
-  const PouchDB = PouchDBModule.default
-
-  const PouchdbFind = PouchdbFindModule.default
-
-  const HttpAdapter = HttpAdapterModule.default
-
-  PouchDB.plugin(PouchdbFind)
-  PouchDB.plugin(HttpAdapter)
-
-  db = new PouchDB(dbName)
 
   return db
 }
