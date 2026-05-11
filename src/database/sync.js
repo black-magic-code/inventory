@@ -2,7 +2,7 @@
 
 import PouchDB from "pouchdb-browser"
 
-import { getDB } from "./pouchDB"
+import { getDB } from "./pouchdb"
 
 let syncHandler = null
 
