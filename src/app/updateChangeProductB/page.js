@@ -6,11 +6,8 @@ import {
     useState
 } from "react"
 
-import Link from "next/link"
-
-
 import {
-    getProducts, subscribeProducts
+    getProducts, subscribeProducts, syncFromCloud
 } from "@/services/product"
 
 import NavHeader from "@/components/layout/header"
@@ -27,11 +24,8 @@ const ProductCard = dynamic(
         ssr: false
     }
 )
-import { startSync } from "@/database/sync"
 
 import {
-    FaSearch,
-    FaPlus,
     FaSlidersH,
     FaBoxOpen,
     FaSortAmountDown,
@@ -74,9 +68,6 @@ export default function HomePage() {
     const [sortType, setSortType] =
         useState("newest")
 
-    const [refreshKey, setRefreshKey] =
-        useState(0)
-
     const [visibleProducts, setVisibleProducts] =
         useState(20)
 
@@ -105,7 +96,11 @@ export default function HomePage() {
             const data =
                 await getProducts()
 
-            setProducts(data)
+            setProducts(
+                Array.isArray(data)
+                    ? data
+                    : []
+            )
 
         } catch (error) {
 
@@ -126,25 +121,19 @@ export default function HomePage() {
 
         const initialize = async () => {
 
-            // LOAD FAST FIRST
-
             await loadProducts(true)
 
-            // START SYNC LATER
+            subscription =
+                await subscribeProducts(
+                    (products) => {
 
-            setTimeout(async () => {
-
-                await startSync()
-
-                subscription =
-                    await subscribeProducts(() => {
-
-                        setRefreshKey(
-                            prev => prev + 1
+                        setProducts(
+                            Array.isArray(products)
+                                ? products
+                                : []
                         )
-                    })
-
-            }, 1500)
+                    }
+                )
         }
 
         initialize()
@@ -161,12 +150,6 @@ export default function HomePage() {
         }
 
     }, [])
-
-    useEffect(() => {
-
-        loadProducts(false)
-
-    }, [refreshKey])
 
     const filteredProducts = useMemo(() => {
 

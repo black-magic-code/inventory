@@ -18,7 +18,6 @@ export async function getDB() {
 
   dbInstance = new PouchDB(
 
-    process.env.NEXT_PUBLIC_DB_NAME ||
     "inventory",
 
     {
@@ -27,6 +26,10 @@ export async function getDB() {
 
       revs_limit: 20
     }
+  )
+
+  console.log(
+    "POUCH DB CONNECTED"
   )
 
   return dbInstance

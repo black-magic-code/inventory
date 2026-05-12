@@ -8,32 +8,65 @@ const withPWA = nextPWA({
 
   skipWaiting: true,
 
-  clientsClaim: true,
+  cacheOnFrontEndNav: true,
+
+  reloadOnOnline: true,
 
   disable:
-    process.env.NODE_ENV === "development",
+    process.env.NODE_ENV ===
+    "development",
 
-  fallbacks: {
+  buildExcludes: [
+    /middleware-manifest\.json$/
+  ],
 
-    document: "/offline"
-  }
+  runtimeCaching: [
+
+    {
+
+      urlPattern: /^https?.*/,
+
+      handler: "StaleWhileRevalidate",
+
+      options: {
+
+        cacheName:
+          "offlineCache",
+
+        expiration: {
+
+          maxEntries: 200,
+
+          maxAgeSeconds:
+            7 * 24 * 60 * 60
+        },
+
+        cacheableResponse: {
+
+          statuses: [0, 200]
+        }
+      }
+    }
+  ]
 })
 
 const nextConfig = {
 
   reactStrictMode: true,
 
-  images: {
-
-    unoptimized: true
-  },
-
   experimental: {
 
     optimizePackageImports: [
       "react-icons"
     ]
+  },
+
+  images: {
+
+    unoptimized: true
   }
 }
 
-export default withPWA(nextConfig)
+export default withPWA(
+  nextConfig
+)

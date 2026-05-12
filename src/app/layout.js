@@ -7,9 +7,7 @@ export const metadata = {
   description:
     "Offline First Inventory Application",
 
-  manifest: "/manifest.json",
-
-  themeColor: "#ededed"
+  manifest: "/manifest.json"
 }
 
 export default function RootLayout({

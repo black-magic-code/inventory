@@ -10,12 +10,14 @@ import Link from "next/link"
 
 
 import {
-  getProducts, subscribeProducts
+  getProducts,
+  subscribeProducts,
+  syncFromCloud
 } from "@/services/product"
 
 import CircleLoader from "@/components/layout/loader/circle"
-
 import dynamic from "next/dynamic"
+
 const ProductCard = dynamic(
 
   () =>
@@ -27,10 +29,10 @@ const ProductCard = dynamic(
     ssr: false
   }
 )
-import { startSync } from "@/database/sync"
-import VoicePopup from "@/components/search/voicePopup"
 
+import VoicePopup from "@/components/search/voicePopup"
 import useVoiceSearch from "@/hooks/useVoiceSearch"
+
 import {
   FaSearch,
   FaPlus,
@@ -86,9 +88,6 @@ export default function HomePage() {
   const [sortType, setSortType] =
     useState("newest")
 
-  const [refreshKey, setRefreshKey] =
-    useState(0)
-
   const [visibleProducts, setVisibleProducts] =
     useState(20)
 
@@ -101,90 +100,62 @@ export default function HomePage() {
   const [edit, setEdit] = useState(false);
 
   const hasActiveFilters = Boolean(
-
     textFilter ||
     minPrice ||
     maxPrice ||
     dateFilter ||
     lowStock ||
     sortType !== "newest"
-
   )
-
-  const loadProducts = async (
-    showLoader = false
-  ) => {
-
-    try {
-
-      if (showLoader) {
-
-        setLoading(true)
-      }
-
-      const data =
-        await getProducts()
-
-      setProducts(data)
-
-    } catch (error) {
-
-      console.log(error)
-
-    } finally {
-
-      if (showLoader) {
-
-        setLoading(false)
-      }
-    }
-  }
-
   useEffect(() => {
 
-    let subscription = null
+    let unsubscribe = null
 
-    const initialize = async () => {
+    async function loadInitialProducts() {
 
-      await loadProducts(true)
+      try {
 
-      setPageReady(true)
+        const data =
+          await getProducts()
 
-      setTimeout(async () => {
+        setProducts(
+          Array.isArray(data)
+            ? data
+            : []
+        )
 
-        await startSync()
+      } catch (error) {
 
-        subscription =
-          await subscribeProducts(() => {
+        console.log(error)
 
-            setRefreshKey(
-              prev => prev + 1
-            )
-          })
+      } finally {
 
-      }, 1500)
+        setLoading(false)
+
+        setPageReady(true)
+      }
+
+      unsubscribe =
+        await subscribeProducts(
+          (products) => {
+
+            setProducts(products)
+          }
+        )
     }
 
-    initialize()
+    loadInitialProducts()
 
     return () => {
 
-      if (
-        subscription &&
-        subscription.cancel
-      ) {
+      if (unsubscribe?.cancel) {
 
-        subscription.cancel()
+        unsubscribe.cancel()
       }
     }
 
   }, [])
 
-  useEffect(() => {
-
-    loadProducts(false)
-
-  }, [refreshKey])
 
   const filteredProducts = useMemo(() => {
 
@@ -1437,7 +1408,6 @@ export default function HomePage() {
                 <ProductCard
                   key={product._id}
                   product={product}
-                  refreshProducts={loadProducts}
                 />
               ))}
 
