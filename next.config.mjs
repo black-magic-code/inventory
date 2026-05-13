@@ -7,7 +7,8 @@ const withPWA = nextPWA({
   register: true,
 
   skipWaiting: true,
-  dynamicStartUrl:true,
+  dynamicStartUrl:false,
+  cacheStartUrl:true,
   
   cacheOnFrontEndNav: false,
 
