@@ -7,8 +7,9 @@ const withPWA = nextPWA({
   register: true,
 
   skipWaiting: true,
-
-  cacheOnFrontEndNav: true,
+  dynamicStartUrl:true,
+  
+  cacheOnFrontEndNav: false,
 
   reloadOnOnline: true,
 
@@ -19,37 +20,6 @@ const withPWA = nextPWA({
   buildExcludes: [
     /middleware-manifest\.json$/
   ],
-
-  runtimeCaching: [
-
-    {
-
-      urlPattern: /^https?.*/,
-
-      handler: "NetworkFirst",
-
-      options: {
-
-        cacheName:
-          "offlineCache",
-
-        networkTimeoutSeconds: 10,
-
-        expiration: {
-
-          maxEntries: 200,
-
-          maxAgeSeconds:
-            7 * 24 * 60 * 60
-        },
-
-        cacheableResponse: {
-
-          statuses: [0, 200]
-        }
-      }
-    }
-  ]
 })
 
 const nextConfig = {
